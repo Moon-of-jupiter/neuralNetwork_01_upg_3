@@ -1,7 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using neuralNetwork_01_upg_3.RNG;
+using neuralNetwork_01_upg_3.Simulator;
 using neuralNetwork_01_upg_3.Simulator.Game.Snake;
+using neuralNetwork_01_upg_3.Simulator.NeuralNet;
+using neuralNetwork_01_upg_3.Simulator.NeuralNet.ActivationFunctions;
+using neuralNetwork_01_upg_3.Simulator.SnakeEvolution;
 using neuralNetwork_01_upg_3.Textures;
 using System;
 using System.Collections.Generic;
@@ -18,17 +22,26 @@ namespace neuralNetwork_01_upg_3
 
         protected SnakeSimulator snakeSimulator;
         protected SnakeRenderer snakeRenderer;
-
+        
         public TestClass(GraphicsDevice gd)
         {
-            var t = new TestSnakeControler();
+            var nn = new A_NeuralNet(6, 5, 4, 4, new SigAF(10));
             Random random = new Random();
+            int next = random.Next();
+            nn.UpdateWeights((int i) =>
+            {
+                next = CustomRandom.ShiftRandomXOr(next + i);
+                return (Math.Abs(next) % 2000) / 1000f - 1;
+            });
 
-            t.seed = random.Next();
+            var t = new NeuralNet_SnakeControler(nn);
+
+
+            //t.seed = random.Next();
 
             snakeSimulator = new SnakeSimulator(t, new SnakeMapData()
             {
-                size = new Point(20, 20),
+                size = new Point(100, 100),
                 seed = random.Next()
             });
 
@@ -57,11 +70,16 @@ namespace neuralNetwork_01_upg_3
                 int i = 0;
             }
 
+            if (snakeSimulator.gameOver)
+            {
+                snakeSimulator.InitializeSnakeMap();
+            }
+
         }
 
         public void Render(SpriteBatch sb)
         {
-            snakeRenderer.Render(sb);
+            snakeRenderer.Render(sb, snakeSimulator);
 
             sb.Begin(SpriteSortMode.Deferred, null, SamplerState.PointWrap);
 

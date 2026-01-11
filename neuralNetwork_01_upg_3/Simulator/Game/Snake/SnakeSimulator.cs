@@ -12,7 +12,7 @@ namespace neuralNetwork_01_upg_3.Simulator.Game.Snake
 {
     public class SnakeSimulator
     {
-        public int score { get; protected set; }
+        public float score => snakeBody.Count + time * 0.001f;
         public bool gameOver { get; protected set; }
         protected ISnakeControler controler;
 
@@ -29,15 +29,20 @@ namespace neuralNetwork_01_upg_3.Simulator.Game.Snake
 
         // map
         public MapElementType[,] map; // 0 = empty, 1 = apple, 2 = snake 
-
+        public int time = 0;
 
         // snake
         protected Queue<Point> snakeBody;
 
+        public Point SnakeHead { get; protected set; }
         protected Point nextSnakePos;
 
         protected Queue<Point> appleTargetQueue;
 
+        // apple data
+
+        public Point LatestApple { get; protected set; }
+        protected bool appleRngInitialized = false;
         public SnakeSimulator(ISnakeControler controler, SnakeMapData mapData)
         {
             this.controler = controler;
@@ -45,14 +50,32 @@ namespace neuralNetwork_01_upg_3.Simulator.Game.Snake
             InitializeSnakeMap();
         }
 
-        protected void InitializeSnakeMap() 
+        public void InitializeSnakeMap() 
         {
-            map = new MapElementType[mapData.size.X, mapData.size.Y];
-            snakeBody = new Queue<Point>();
+            if (map == null)
+                map = new MapElementType[mapData.size.X, mapData.size.Y];
+            else 
+            {
+                Point p = Point.Zero;
 
+                for (int x = 0; x < mapData.size.X; x++)
+                {
+                    p.X = x;
+                    for (int y = 0; y < mapData.size.Y; y++)
+                    {
+                        p.Y = y;
+                        UpdateMap(ref p, MapElementType.empty);
+                    }
+                }
+            }
+            
+            if(snakeBody == null) 
+                snakeBody = new Queue<Point>();
+            else 
+                snakeBody.Clear();
 
             var a = new Point(mapData.size.X / 2, mapData.size.Y / 2);
-            
+            SnakeHead = a;
             for(int i = 0; i < 2; i++)
             {
                 snakeBody.Enqueue(a);
@@ -61,8 +84,10 @@ namespace neuralNetwork_01_upg_3.Simulator.Game.Snake
 
             
             //UpdateMap(ref a,MapElementType.snake);
+            if(!appleRngInitialized)
+                InitialzieAppleRNG(mapData.seed);
 
-            InitialzieAppleRNG(mapData.seed);
+            gameOver = false;
 
             UpdateApple();
             
@@ -70,6 +95,8 @@ namespace neuralNetwork_01_upg_3.Simulator.Game.Snake
 
         protected void InitialzieAppleRNG(int seed)
         {
+            appleRngInitialized = true;
+
             appleTargetQueue = new Queue<Point>();
 
             List<Point> temp = new List<Point>();
@@ -97,6 +124,8 @@ namespace neuralNetwork_01_upg_3.Simulator.Game.Snake
             }
         }
 
+        
+
         protected bool CycleQueue<T>(Queue<T> queue, int maxIterations, out T foundValue, Func<T,bool> condition)
         {
             int counter = 0;
@@ -115,7 +144,9 @@ namespace neuralNetwork_01_upg_3.Simulator.Game.Snake
         public void Update()
         {
             if(gameOver) return;
+            time++;
             UpdateSnake(controler.Control(this));
+            
         }
 
         protected void UpdateSnake(Point direction)
@@ -136,7 +167,7 @@ namespace neuralNetwork_01_upg_3.Simulator.Game.Snake
             }
 
             // build snake
-
+            SnakeHead = nextSnakePos;
             UpdateMap(ref nextSnakePos, MapElementType.snake);
             snakeBody.Enqueue(nextSnakePos);
 
@@ -164,13 +195,18 @@ namespace neuralNetwork_01_upg_3.Simulator.Game.Snake
                 return target == MapElementType.empty || target == MapElementType.apple;
             })) return;
 
-            UpdateMap(ref foundPos, MapElementType.apple);
+            SetNewApplePos(ref foundPos);
+        }
+
+        protected void SetNewApplePos(ref Point pos)
+        {
+            LatestApple = pos;
+            UpdateMap(ref pos, MapElementType.apple);
         }
 
         public void EndGame()
         {
             gameOver = true;
-            score = snakeBody.Count;
         }
         
         public bool Raycast(ref Point startPos,ref Point direction, out int length, MapElementType target)

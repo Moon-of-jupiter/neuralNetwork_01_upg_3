@@ -14,7 +14,7 @@ namespace neuralNetwork_01_upg_3.Simulator.Game.Snake
         protected SnakeRendererData renderData;
 
 
-        protected SnakeSimulator snakeSimulator;
+        //protected SnakeSimulator snakeSimulator;
 
         protected Rectangle bounds;
         public RenderTarget2D renderTarget { get; protected set; }
@@ -42,11 +42,11 @@ namespace neuralNetwork_01_upg_3.Simulator.Game.Snake
 
         public void SetSnakeGame(SnakeSimulator game)
         {
-            this.snakeSimulator = game;
-            UpdateBounds();
+            //this.snakeSimulator = game;
+            UpdateBounds(game );
         }
 
-        public void UpdateBounds()
+        public void UpdateBounds(SnakeSimulator snakeSimulator)
         {
             if(renderTarget != null)
                 renderTarget.Dispose();
@@ -58,7 +58,7 @@ namespace neuralNetwork_01_upg_3.Simulator.Game.Snake
 
         }
 
-        public void Render(SpriteBatch sb)
+        public void Render(SpriteBatch sb, SnakeSimulator snakeSimulator)
         {
             renderData.gd.SetRenderTarget(renderTarget);
             

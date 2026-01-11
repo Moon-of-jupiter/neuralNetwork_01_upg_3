@@ -6,8 +6,12 @@ using System.Threading.Tasks;
 
 namespace neuralNetwork_01_upg_3.Simulator.NeuralNet
 {
-    public class NeuralNet
+    public class A_NeuralNet
     {
+        public int InputLayersCount => input.Count;
+        public int OutputLayersCount => output.Count;
+        public int WeightsCount => weights.Count;
+
         public List<NeuralLayer> neuralLayers;
 
         protected List<Weight> weights;
@@ -20,7 +24,7 @@ namespace neuralNetwork_01_upg_3.Simulator.NeuralNet
 
         protected Signal bias;
 
-        public NeuralNet(int input_n, int hidden_n, int output_n, int hidden_layers, IActivationFunction activationFunction)
+        public A_NeuralNet(int input_n, int hidden_n, int output_n, int hidden_layers, IActivationFunction activationFunction)
         {
             neuralLayers = new List<NeuralLayer>();
             weights = new List<Weight>();
@@ -143,6 +147,16 @@ namespace neuralNetwork_01_upg_3.Simulator.NeuralNet
         #endregion
 
         #region Use Net
+
+        public void SetInput(int inputIndex,float value)
+        {
+            input[inputIndex].value = value;
+        }
+
+        public float ReadOutput(int outputIndex)
+        {
+            return output[outputIndex].value;
+        }
 
         public void UpdateWeights(Func<int,float> GetNewValues)
         {

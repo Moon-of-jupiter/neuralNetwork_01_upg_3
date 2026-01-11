@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using neuralNetwork_01_upg_3.Simulator;
 using neuralNetwork_01_upg_3.Simulator.NeuralNet;
 using neuralNetwork_01_upg_3.Simulator.NeuralNet.ActivationFunctions;
 using neuralNetwork_01_upg_3.Textures;
@@ -18,6 +19,7 @@ namespace neuralNetwork_01_upg_3
         private SpriteBatch _spriteBatch;
 
         private TestClass test;
+        private GameManager gm;
 
         private bool firstFrame = true;
 
@@ -52,7 +54,7 @@ namespace neuralNetwork_01_upg_3
         protected void OnFirstFrame()
         {
             test = new TestClass(_graphics.GraphicsDevice);
-
+            gm = new GameManager(_graphics.GraphicsDevice);
             firstFrame = false;
         }
 
@@ -68,7 +70,7 @@ namespace neuralNetwork_01_upg_3
             }
 
 
-            test.Update();
+            gm.Update();
 
             // TODO: Add your update logic here
 
@@ -79,7 +81,7 @@ namespace neuralNetwork_01_upg_3
         {
             GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.CornflowerBlue);
 
-            test.Render(_spriteBatch);
+            gm.Render(_spriteBatch);
 
             // TODO: Add your drawing code here
 

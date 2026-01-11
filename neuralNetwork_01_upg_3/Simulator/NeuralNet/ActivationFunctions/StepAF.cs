@@ -16,4 +16,17 @@ namespace neuralNetwork_01_upg_3.Simulator.NeuralNet.ActivationFunctions
             return input >= threshold ? 0: threshold;
         }
     }
+
+    public class SigAF : IActivationFunction
+    {
+        protected float power;
+        public SigAF(float power = 1)
+        {
+            this.power = power;
+        }
+        public float Activation(float input)
+        {
+            return 1f / (1f + MathF.Pow(MathF.E, -input*power));
+        }
+    }
 }

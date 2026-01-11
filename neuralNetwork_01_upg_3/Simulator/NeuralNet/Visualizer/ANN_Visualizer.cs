@@ -11,7 +11,7 @@ namespace neuralNetwork_01_upg_3.Simulator.NeuralNet.Visualizer
 {
     public class ANN_Visualizer
     {
-        public NeuralNet net;
+        public A_NeuralNet net;
 
         public RenderTarget2D rt;
 
@@ -24,7 +24,7 @@ namespace neuralNetwork_01_upg_3.Simulator.NeuralNet.Visualizer
         protected Texture2D neuronTex;
 
         private Rectangle destRect;
-        public ANN_Visualizer(NeuralNet net) 
+        public ANN_Visualizer(A_NeuralNet net) 
         {
             
         }
@@ -38,7 +38,7 @@ namespace neuralNetwork_01_upg_3.Simulator.NeuralNet.Visualizer
 
         }
 
-        public void SetNeuralNet(NeuralNet net)
+        public void SetNeuralNet(A_NeuralNet net)
         {
 
         }

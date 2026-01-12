@@ -16,7 +16,7 @@ namespace neuralNetwork_01_upg_3.Simulator.SnakeEvolution
         
 
         protected A_NeuralNet neuralNet;
-
+        
         public NeuralNet_SnakeControler(A_NeuralNet neuralNet)
         {
             this.neuralNet = neuralNet;
@@ -49,7 +49,7 @@ namespace neuralNetwork_01_upg_3.Simulator.SnakeEvolution
             {
                 GetDirection(i, ref direction);
                 snakeSim.Raycast(ref snakeOrigin, ref direction, out distanceToDanger, SnakeSimulator.MapElementType.snake);
-                neuralNet.SetInput(i + 2, distanceToDanger);
+                neuralNet.SetInput(i + 2, distanceToDanger - 1);
             }
         }
 

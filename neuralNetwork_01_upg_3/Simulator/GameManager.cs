@@ -13,27 +13,34 @@ namespace neuralNetwork_01_upg_3.Simulator
 {
     public class GameManager
     {
-        protected HeadSimulatorManager headSimulatorManager;
+        public int Generation => headSimulatorManager.Generation;
+        public int CurrentTarget;
+        public float CurrentScore;
+        public int AliveSnakes => headSimulatorManager._simulationManager.AlivePopulation;
+
+        public HeadSimulatorManager headSimulatorManager;
         protected SnakeRenderer sr;
         public GameManager(GraphicsDevice gd)
         {
             var a = new EvoluionSimData
             {
-                neuralNetwork_Height = 6,
-                neuralNetwork_Width = 4,
-                population = 30,
+                neuralNetwork_Height = 10,
+                neuralNetwork_Width = 3,
+                population = 1000,
 
-                mapSize = new Point(50,50),
+                mapSize = new Point(35,35),
                 
             };
+
+            Random rd = new Random();
 
             headSimulatorManager = new HeadSimulatorManager(a);
 
             headSimulatorManager._evolutionManager.SetEvolutionManagers
                 (
-                new Selector01(0.7f, 1f, 31),
+                new Selector01(0.8f, 1f, rd.Next()),
                 new Crossover01(),
-                new Mutator01(0.3f, 0.5f, 30)
+                new Mutator01(0.1f,0.3f, 0.01f, rd.Next())
 
                 );
 
@@ -45,7 +52,7 @@ namespace neuralNetwork_01_upg_3.Simulator
             };
 
             sr = new SnakeRenderer(SnakeRenderer.CreuateSnakeRenderData(gd, 1, TextureManager.GetTexture("snakeMapSprites"), colors));
-
+            
             sr.SetSnakeGame(headSimulatorManager._simulationManager.simulators[0]);
         }
 
@@ -57,8 +64,23 @@ namespace neuralNetwork_01_upg_3.Simulator
 
         public void Render(SpriteBatch _spriteBatch)
         {
-            sr.Render(_spriteBatch,headSimulatorManager._simulationManager.simulators[0]);
+            
+            for(int i = 0; i < headSimulatorManager._simulationManager.simulators.Length; i++)
+            {
+                if (headSimulatorManager._simulationManager.simulators[i].gameOver)
+                    continue;
+                var entety = headSimulatorManager._evolutionManager.population[i];
 
+                float r = MathF.Sin(entety.genome[entety.genome.Length - 1]);
+                float g = MathF.Sin(entety.genome[entety.genome.Length - 2]);
+                float b = MathF.Sin(entety.genome[entety.genome.Length - 3]);
+                sr.renderData.tileType_GameTextures[2].color = new Color(r,g,b,1);
+
+                sr.Render(_spriteBatch, headSimulatorManager._simulationManager.simulators[i]);
+                CurrentTarget = i;
+                CurrentScore = headSimulatorManager._simulationManager.simulators[i].score;
+                break;
+            }
 
 
             _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointWrap);

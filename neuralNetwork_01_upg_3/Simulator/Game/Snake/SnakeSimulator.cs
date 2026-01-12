@@ -12,11 +12,14 @@ namespace neuralNetwork_01_upg_3.Simulator.Game.Snake
 {
     public class SnakeSimulator
     {
-        public float score => snakeBody.Count + time * 0.001f;
+        public float score => snakeBody.Count - time * 0.001f;
         public bool gameOver { get; protected set; }
         protected ISnakeControler controler;
 
         protected SnakeMapData mapData;
+
+        private Point lastMove;
+        private Point rev_lastMove;
 
         public enum MapElementType : byte
         {
@@ -30,6 +33,8 @@ namespace neuralNetwork_01_upg_3.Simulator.Game.Snake
         // map
         public MapElementType[,] map; // 0 = empty, 1 = apple, 2 = snake 
         public int time = 0;
+        public int killTimer;
+        public int killTimerReset =>  100 * snakeBody.Count;
 
         // snake
         protected Queue<Point> snakeBody;
@@ -82,14 +87,21 @@ namespace neuralNetwork_01_upg_3.Simulator.Game.Snake
                 snakeBody.Enqueue(a);
             }
 
-            
+
+            rev_lastMove = Point.Zero;
+            lastMove = Point.Zero;
+
             //UpdateMap(ref a,MapElementType.snake);
-            if(!appleRngInitialized)
+            if (!appleRngInitialized)
                 InitialzieAppleRNG(mapData.seed);
 
             gameOver = false;
 
             UpdateApple();
+
+
+            time = 0;
+            killTimer = killTimerReset;
             
         }
 
@@ -145,7 +157,24 @@ namespace neuralNetwork_01_upg_3.Simulator.Game.Snake
         {
             if(gameOver) return;
             time++;
-            UpdateSnake(controler.Control(this));
+            killTimer--;
+
+            if(killTimer <= 0)
+            {
+                EndGame();
+                return;
+            }
+
+            Point direction = controler.Control(this);
+
+            if (direction == rev_lastMove)
+                direction = lastMove;
+
+            lastMove = direction;
+            rev_lastMove.X = -direction.X;
+            rev_lastMove.Y = -direction.Y;
+
+            UpdateSnake(direction);
             
         }
 
@@ -180,7 +209,7 @@ namespace neuralNetwork_01_upg_3.Simulator.Game.Snake
                 return;
             }
 
-
+            killTimer = killTimerReset;
             // if apple
             UpdateApple();
 

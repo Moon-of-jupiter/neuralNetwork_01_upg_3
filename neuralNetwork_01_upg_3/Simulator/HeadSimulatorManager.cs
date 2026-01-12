@@ -33,7 +33,7 @@ namespace neuralNetwork_01_upg_3.Simulator
         private EvoluionSimData simData;
         public HeadSimulatorManager(EvoluionSimData simData)
         {
-            activationFunction = new SigAF(10);
+            activationFunction = new SigAF(4);
 
             this.simData = simData;
 
@@ -69,7 +69,7 @@ namespace neuralNetwork_01_upg_3.Simulator
                 //population[i] = new EvolutionSpecimin(neuralNetworks[i].WeightsCount);
             }
 
-            _evolutionManager.InitializePopulation(weights_count);
+            _evolutionManager.InitializePopulation(weights_count + 3);
         }
 
         public void StartNewGeneration()
@@ -100,13 +100,15 @@ namespace neuralNetwork_01_upg_3.Simulator
         {
             _simulationManager.UpdateSimulators();
 
-            if(_simulationManager.AlivePopulation == 0)
+            if(_simulationManager.AlivePopulation <= 0 )
             {
                 EndGeneration();
                 StartNewGeneration();
             }
 
         }
+
+        
 
     }
 

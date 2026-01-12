@@ -33,7 +33,7 @@ namespace neuralNetwork_01_upg_3.Simulator
         private EvoluionSimData simData;
         public HeadSimulatorManager(EvoluionSimData simData)
         {
-            activationFunction = new SigAF(4);
+            activationFunction = new SigAF(2);
 
             this.simData = simData;
 

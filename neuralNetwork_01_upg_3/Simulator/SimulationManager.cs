@@ -34,19 +34,19 @@ namespace neuralNetwork_01_upg_3.Simulator
 
             simulators = new SnakeSimulator[neuralNets.Length];
 
-            for (int i = 0; i < neuralNets.Length; i++)
-            {
-                simulators[i] = new(snakeControlers[i],snakeMapData);
-            }
+            InitializeSimulators();
 
             scores = new float[neuralNets.Length];
         }
 
         protected void InitializeSimulators()
         {
+            int rngNext = snakeMapData.seed;
+
             for (int i = 0; i < simulators.Length; i++)
             {
-                snakeMapData.seed = CustomRandom.ShiftRandomXOr(snakeMapData.seed);
+                snakeMapData.seed = rngNext = CustomRandom.ShiftRandomXOr(rngNext);
+                //snakeMapData.size.X = Math.Abs(CustomRandom.ShiftRandomXOr(snakeMapData.seed)) % 10 + 1;
                 simulators[i] = new SnakeSimulator(snakeControlers[i],snakeMapData);
                 simulators[i].InitializeSnakeMap();
             }

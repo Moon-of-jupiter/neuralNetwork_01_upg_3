@@ -59,7 +59,7 @@ namespace neuralNetwork_01_upg_3
             firstFrame = false;
         }
 
-        
+        protected bool isOn = false;
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Delete))
@@ -70,8 +70,23 @@ namespace neuralNetwork_01_upg_3
                 OnFirstFrame();
             }
 
+            if (!isOn)
+            {
+                if (!Keyboard.GetState().IsKeyDown(Keys.Space))
+                {
+                    base.Update(gameTime);
+                    return;
+                }
+                
 
-            Window.Title = $"Snake Evolution, Generation: {gm.headSimulatorManager.Generation}, Target Snake {gm.CurrentTarget} / {gm.AliveSnakes}, Score: {((int)(gm.CurrentScore*10))/10f}";
+                isOn = true;
+            }
+            
+
+            
+
+
+            Window.Title = $"Snake Evolution, view: {gm.RenderingState}, Generation: {gm.headSimulatorManager.Generation}, Target Snake {gm.CurrentTarget} / {gm.AliveSnakes}, Score: {((int)(gm.CurrentScore*10))/10f}";
 
             gm.Update();
 

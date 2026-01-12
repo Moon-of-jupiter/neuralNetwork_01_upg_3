@@ -40,13 +40,13 @@ namespace neuralNetwork_01_upg_3.Simulator.Evolution.SubProcessies
 
             for(int i = 0; i < selected_parents.Length; i++)
             {
-                selected_parents[i].ParentA = SelectRoulete(wheel, RandomUpTo(randomNext, fitnessSum, 10000));
-                selected_parents[i].ParentB = SelectRoulete(wheel, RandomUpTo(randomNext, fitnessSum, 10000));
+                selected_parents[i].ParentA = SelectRoulete(wheel, RandomUpTo(ref randomNext, fitnessSum, 10000));
+                selected_parents[i].ParentB = SelectRoulete(wheel, RandomUpTo(ref randomNext, fitnessSum, 10000));
             }
 
 
         }
-        protected float RandomUpTo(int randomNext, float max, int resolution)
+        protected float RandomUpTo(ref int randomNext, float max, int resolution)
         {
             randomNext = CustomRandom.ShiftRandomXOr(randomNext);
 

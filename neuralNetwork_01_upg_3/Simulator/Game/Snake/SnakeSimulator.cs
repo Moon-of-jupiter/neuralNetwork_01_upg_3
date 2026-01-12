@@ -34,7 +34,7 @@ namespace neuralNetwork_01_upg_3.Simulator.Game.Snake
         public MapElementType[,] map; // 0 = empty, 1 = apple, 2 = snake 
         public int time = 0;
         public int killTimer;
-        public int killTimerReset =>  100 * snakeBody.Count;
+        public int killTimerReset =>  200 + snakeBody.Count * 10;
 
         // snake
         protected Queue<Point> snakeBody;

@@ -86,9 +86,11 @@ namespace neuralNetwork_01_upg_3
             
 
 
-            Window.Title = $"Snake Evolution, view: {gm.RenderingState}, Generation: {gm.headSimulatorManager.Generation}, Target Snake {gm.CurrentTarget} / {gm.AliveSnakes}, Score: {((int)(gm.CurrentScore*10))/10f}";
 
             gm.Update();
+
+            Window.Title = $"Snake Evolution, view: {gm.RenderingState}, Generation: {gm.headSimulatorManager.Generation}, Target Snake {gm.CurrentTarget} / {gm.AliveSnakes}, Score: {((int)(gm.CurrentScore * 10)) / 10f}";
+
 
             // TODO: Add your update logic here
 

@@ -25,11 +25,12 @@ namespace neuralNetwork_01_upg_3.Simulator.Evolution
         public IMutation    _mutationManager;
 
 
-        public EvolutionManager(int populationSize)
+        public EvolutionManager(int populationSize, int seed)
         {
             population = new EvolutionSpecimin[populationSize];
             children_buffer = new EvolutionSpecimin[populationSize];
             children_parents = new EvolutionChild_Parrents[populationSize];
+            rngNext = seed;
 
         }
 

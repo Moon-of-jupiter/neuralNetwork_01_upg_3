@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using neuralNetwork_01_upg_3.RNG;
 using neuralNetwork_01_upg_3.Simulator.Evolution;
 using neuralNetwork_01_upg_3.Simulator.Game.Snake;
 using neuralNetwork_01_upg_3.Simulator.NeuralNet;
@@ -14,7 +15,8 @@ namespace neuralNetwork_01_upg_3.Simulator
     public class HeadSimulatorManager
     {
         public int Generation {  get; private set; }
-
+        public float BestScore { get; private set; }
+        public int BestPhenotype { get; private set; }
         protected EvolutionSpecimin[] population => _evolutionManager.population;
 
 
@@ -31,13 +33,17 @@ namespace neuralNetwork_01_upg_3.Simulator
         protected bool ActiveGeneration;
 
         private EvoluionSimData simData;
-        public HeadSimulatorManager(EvoluionSimData simData)
+
+
+        public List<float> Scores { get; private set; }
+
+        public HeadSimulatorManager(EvoluionSimData simData, int rngSeed)
         {
             activationFunction = new SigAF(2);
 
             this.simData = simData;
 
-            _evolutionManager = new EvolutionManager(simData.population);
+            _evolutionManager = new EvolutionManager(simData.population, rngSeed);
 
 
             //population = new EvolutionSpecimin[simData.population];
@@ -48,13 +54,16 @@ namespace neuralNetwork_01_upg_3.Simulator
             _simulationManager = new SimulationManager(neuralNetworks, new SnakeMapData()
             {
                 size = simData.mapSize,
+                seed = CustomRandom.ShiftRandomXOr(rngSeed - 3),
             });
 
-            
-            
+
+
+            Scores = new List<float>();
+
+            StartNewGeneration();
 
             
-            StartNewGeneration();
         }
 
         protected void InitializeANNs()
@@ -76,7 +85,9 @@ namespace neuralNetwork_01_upg_3.Simulator
         {
             Generation++;
 
-            for(int i = 0; i < population.Length; i++)
+            
+
+            for (int i = 0; i < population.Length; i++)
             {
                 neuralNetworks[i].UpdateWeights((int weight) => { return population[i].genome[weight]; });
             }
@@ -100,12 +111,21 @@ namespace neuralNetwork_01_upg_3.Simulator
         {
             _simulationManager.UpdateSimulators();
 
-            if(_simulationManager.AlivePopulation <= 0 )
+            _simulationManager.FindBestScore(out float BestScore, out int BestPhenotype);
+
+            this.BestScore = BestScore;
+            this.BestPhenotype = BestPhenotype;
+
+            if (_simulationManager.AlivePopulation <= 0)
             {
+                Scores.Add(BestScore);
+                //Scores[Generation] = _simulationManager.FindBestScore();
+
                 EndGeneration();
                 StartNewGeneration();
             }
 
+            
         }
 
         

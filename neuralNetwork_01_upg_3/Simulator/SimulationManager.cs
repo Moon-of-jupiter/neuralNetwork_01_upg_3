@@ -45,7 +45,7 @@ namespace neuralNetwork_01_upg_3.Simulator
 
             for (int i = 0; i < simulators.Length; i++)
             {
-                snakeMapData.seed = rngNext = CustomRandom.ShiftRandomXOr(rngNext);
+                snakeMapData.seed = rngNext = CustomRandom.ShiftRandomXOr(rngNext + 16);
                 //snakeMapData.size.X = Math.Abs(CustomRandom.ShiftRandomXOr(snakeMapData.seed)) % 10 + 1;
                 simulators[i] = new SnakeSimulator(snakeControlers[i],snakeMapData);
                 simulators[i].InitializeSnakeMap();
@@ -78,6 +78,22 @@ namespace neuralNetwork_01_upg_3.Simulator
             {
                 scores[i] /= maxScore;
             }
+        }
+
+        public void FindBestScore(out float bestScore, out int bestPhenotype)
+        {
+            bestScore = simulators[0].score;
+            bestPhenotype = 0;
+            for (int i = 1; i < simulators.Length; i++)
+            {
+                if (bestScore < simulators[i].score)
+                {
+                    bestScore = simulators[i].score;
+                    bestPhenotype = i;
+                }
+            }
+
+            
         }
         
         public void UpdateSimulators()

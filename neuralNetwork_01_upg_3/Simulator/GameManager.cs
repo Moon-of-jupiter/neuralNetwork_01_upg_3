@@ -17,6 +17,8 @@ namespace neuralNetwork_01_upg_3.Simulator
         public int Generation => headSimulatorManager.Generation;
         public int CurrentTarget;
         public float CurrentScore;
+        public float BestScore;
+        
         public int AliveSnakes => headSimulatorManager._simulationManager.AlivePopulation;
 
         public HeadSimulatorManager headSimulatorManager;
@@ -25,13 +27,20 @@ namespace neuralNetwork_01_upg_3.Simulator
         public int RenderingState = 0;
         private bool switchStateKeyPressed = false;
 
+
+        private Rectangle displayRect = new Rectangle(0, 0, 400, 400);
+
+        private Rectangle graphRect = new Rectangle(450, 200, 200, 200);
+
+        private GraphRenderer graphRenderer;
+
         public GameManager(GraphicsDevice gd)
         {
             var a = new EvoluionSimData
             {
                 neuralNetwork_Height = 10,
                 neuralNetwork_Width = 3,
-                population = 20000,
+                population = 10000,
 
                 mapSize = new Point(25,25),
                 
@@ -39,13 +48,13 @@ namespace neuralNetwork_01_upg_3.Simulator
 
             Random rd = new Random();
 
-            headSimulatorManager = new HeadSimulatorManager(a);
+            headSimulatorManager = new HeadSimulatorManager(a,rd.Next());
 
             headSimulatorManager._evolutionManager.SetEvolutionManagers
                 (
                 new Selector01(0.7f, 1f, rd.Next()),
                 new Crossover01(rd.Next()),
-                new Mutator01(0.1f,0.3f, 0.01f, rd.Next())
+                new Mutator01(0.05f,0.1f, 0.01f, rd.Next())
 
                 );
 
@@ -59,6 +68,16 @@ namespace neuralNetwork_01_upg_3.Simulator
             sr = new SnakeRenderer(SnakeRenderer.CreuateSnakeRenderData(gd, 1, TextureManager.GetTexture("snakeMapSprites"), colors));
             
             sr.SetSnakeGame(headSimulatorManager._simulationManager.simulators[0]);
+
+
+            graphRenderer = new GraphRenderer(new GraphRenderer_Data()
+            {
+                Bounds = graphRect,
+                lineThickness = 1,
+                color = Color.Aquamarine,
+                tex = TextureManager.GetTexture("graphTex")
+            }, headSimulatorManager.Scores);
+
         }
 
 
@@ -66,8 +85,14 @@ namespace neuralNetwork_01_upg_3.Simulator
         {
             headSimulatorManager.Update();
 
+            
+            BestScore = headSimulatorManager.BestScore;
             ChangeRenderState();
         }
+
+        
+
+        
 
         private void ChangeRenderState()
         {
@@ -76,7 +101,7 @@ namespace neuralNetwork_01_upg_3.Simulator
                 if (!switchStateKeyPressed)
                 {
                     RenderingState++;
-                    RenderingState %= 2;
+                    RenderingState %= 3;
                 }
 
                 switchStateKeyPressed = true;
@@ -117,6 +142,22 @@ namespace neuralNetwork_01_upg_3.Simulator
                 break;
             }
         }
+
+        private void RenderBestUntillDeath(SpriteBatch _spriteBatch)
+        {
+            for (int i = 0; i < headSimulatorManager._simulationManager.simulators.Length; i++)
+            {
+                int accual = (i + headSimulatorManager.BestPhenotype) % headSimulatorManager._simulationManager.simulators.Length;
+
+                if (headSimulatorManager._simulationManager.simulators[accual].gameOver)
+                    continue;
+
+                RenderSnake(_spriteBatch, accual);
+
+                break;
+            }
+        }
+
         private float currentTarget;
         
         private void RennderSnakesOneEachFrame(SpriteBatch _spriteBatch, float speedOfChange, bool skip_dead)
@@ -143,11 +184,15 @@ namespace neuralNetwork_01_upg_3.Simulator
             switch (RenderingState)
             {
                 case 1:
+                    RenderSnakesUntillDeath(_spriteBatch);
+                    break;
+
+                case 2:
                     RennderSnakesOneEachFrame(_spriteBatch, 0.25f, true);
                     break;
 
                 default:
-                    RenderSnakesUntillDeath(_spriteBatch);
+                    RenderBestUntillDeath(_spriteBatch);
                     break;
             }
             
@@ -157,7 +202,11 @@ namespace neuralNetwork_01_upg_3.Simulator
 
             _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointWrap);
 
-            _spriteBatch.Draw(sr.renderTarget, new Rectangle(0, 0, 400, 400), Color.White);
+            _spriteBatch.Draw(sr.renderTarget, displayRect, Color.White);
+
+            _spriteBatch.Draw(TextureManager.GetTexture("a"), graphRenderer.data.Bounds, new Color(30, 30, 30));
+            graphRenderer.Render(_spriteBatch);
+            
 
             _spriteBatch.End();
         }

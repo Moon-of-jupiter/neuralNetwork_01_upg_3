@@ -32,13 +32,13 @@ namespace neuralNetwork_01_upg_3.Simulator.Evolution.SubProcessies
                 {
                     rngNext = CustomRandom.ShiftRandomXOr(rngNext);
 
-                    float probRng = CustomRandom.ShiftRandomXOr(rngNext);
+                    float probRng = CustomRandom.ShiftRandomXOr(rngNext + 1);
                     if (((Math.Abs(probRng) % 1000) / 1000f) <= mutation_probability)
                     {
                         target_population[i].genome[j] += ((Math.Abs(rngNext) % 2000) / 1000f - 1) * mutation_strength;
                     }
 
-                    probRng = CustomRandom.ShiftRandomXOr((int)probRng);
+                    probRng = CustomRandom.ShiftRandomXOr((int)probRng + 1);
                     if (((Math.Abs(probRng) % 1000) / 1000f) <= heavy_mutation_probability)
                     {
                         target_population[i].genome[j] = (Math.Abs(rngNext) % 2000) / 1000f - 1;

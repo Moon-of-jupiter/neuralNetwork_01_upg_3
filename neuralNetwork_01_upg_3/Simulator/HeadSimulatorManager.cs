@@ -16,7 +16,13 @@ namespace neuralNetwork_01_upg_3.Simulator
     {
         public int Generation {  get; private set; }
         public float BestScore { get; private set; }
+        public float HighestScoreLastRound { get; private set; }
+        public float HighestScoreEver { get; private set; }
         public int BestPhenotype { get; private set; }
+        
+
+        public int GameFrame {  get; private set; }
+        
         protected EvolutionSpecimin[] population => _evolutionManager.population;
 
 
@@ -97,6 +103,9 @@ namespace neuralNetwork_01_upg_3.Simulator
 
         public void EndGeneration()
         {
+            HighestScoreLastRound = BestScore;
+
+
             _simulationManager.ScoreSimulation();
             for(int i = 0; i < population.Length; i++)
             {
@@ -113,19 +122,22 @@ namespace neuralNetwork_01_upg_3.Simulator
 
             _simulationManager.FindBestScore(out float BestScore, out int BestPhenotype);
 
+            if(BestScore > HighestScoreEver) HighestScoreEver = BestScore;
+
             this.BestScore = BestScore;
             this.BestPhenotype = BestPhenotype;
 
             if (_simulationManager.AlivePopulation <= 0)
             {
                 Scores.Add(BestScore);
+                GameFrame = 0;
                 //Scores[Generation] = _simulationManager.FindBestScore();
 
                 EndGeneration();
                 StartNewGeneration();
             }
 
-            
+            GameFrame++;
         }
 
         

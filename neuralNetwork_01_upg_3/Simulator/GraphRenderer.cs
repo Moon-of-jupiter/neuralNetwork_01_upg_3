@@ -4,6 +4,7 @@ using neuralNetwork_01_upg_3.Simulator.Game.Snake;
 using neuralNetwork_01_upg_3.Textures;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,17 +17,38 @@ namespace neuralNetwork_01_upg_3.Simulator
 
         public List<float> values;
 
-         
+        public RenderTarget2D renderTarget { get; private set; }
 
         public GraphRenderer_Data data;
 
+        public GraphicsDevice gd;
 
-        public GraphRenderer(GraphRenderer_Data data, List<float> values)
+        private Rectangle rect;
+
+        private Vector2 reusedVec;
+        private Vector2 reusedVec2;
+
+        public GraphRenderer(GraphicsDevice gd,GraphRenderer_Data data, List<float> values)
         {
             this.data = data;
             this.values = values;
+
+            this.gd = gd;
+            reusedVec2 = new Vector2();
+            reusedVec = new Vector2();
         }
 
+        public void UpdateRT()
+        {
+            if(renderTarget != null)
+            {
+                renderTarget.Dispose();
+                renderTarget = null;
+            }
+
+            renderTarget = new RenderTarget2D(gd, data.Bounds.X, data.Bounds.Y);
+            
+        }
         
         public void Render(SpriteBatch sb)
         {
@@ -45,41 +67,78 @@ namespace neuralNetwork_01_upg_3.Simulator
             }
 
 
-            float baseline = values[0];
+            float baseline = minValue;
+
+            if(baseline < 0)
+            {
+                maxValue -= minValue;
+            }
+
+            gd.SetRenderTarget(renderTarget);
+            
+            gd.Clear(Color.Transparent);
+            sb.Begin();
+
             for (int i = 0; i < values.Count; i++)
             {
                 lastPoint = nextPoint;
 
                 nextPoint.X = i / (values.Count - 1f);
-                nextPoint.Y = 1 - (values[i] - baseline) / maxValue;
+                nextPoint.Y = 1 - (values[i] - baseline) / (maxValue);
 
                 if(i == 0) continue;
 
-                DrawPoint(sb, lastPoint, nextPoint);
+                DrawSegment(sb,ref lastPoint,ref nextPoint);
             }
+
+            sb.End();
+
+            gd.SetRenderTarget(null);
             
         }
 
-        protected void DrawPoint(SpriteBatch sb,Vector2 lastValue, Vector2 nextValue)
+        protected void DrawSegment(SpriteBatch sb,ref Vector2 lastValue,ref Vector2 nextValue)
         {
-            DrawHelper.DrawLine(sb, data.tex, data.tex.Bounds, data.color, ValueToPoint(lastValue), ValueToPoint(nextValue), data.lineThickness);
+            ValueToPoint(ref lastValue, ref reusedVec);
+            ValueToPoint(ref nextValue, ref reusedVec2);
+
+            DrawHelper.DrawLine(sb, data.tex, data.tex.Bounds, data.color, reusedVec, reusedVec2, data.lineThickness);
+            DrawPoint(sb,ref lastValue);
         }
 
-        protected Vector2 ValueToPoint(Vector2 value)
+        protected void DrawPoint(SpriteBatch sb,ref Vector2 point)
         {
-            return value * data.Bounds.Size.ToVector2() + data.Bounds.Location.ToVector2();
+            ValueToPoint(ref point, ref reusedVec);
+            rect.Width = data.lineThickness;
+            rect.Height = data.lineThickness;
+            rect.X = (int)(reusedVec.X);
+            rect.Y = (int)(reusedVec.Y);
+            sb.Draw(data.connection_tex, rect,data.connection_tex.Bounds,data.color,0, data.connection_tex.Bounds.Size.ToVector2() * 0.5f, SpriteEffects.None, 0);
+
+        }
+
+
+        protected void ValueToPoint(ref Vector2 value, ref Vector2 outVal)
+        {
+            outVal.X = value.X * data.Bounds.X;
+            outVal.Y = value.Y * data.Bounds.Y - data.lineThickness * 0.5f;
+                
         }
 
     }
 
     public struct GraphRenderer_Data
     {
-        public Rectangle Bounds;
+        public Point Bounds;
 
         public int lineThickness;
 
         public Texture2D tex;
+        public Texture2D connection_tex;
         public Color color;
+
+        
+        public Color background_color;
 
         
     }

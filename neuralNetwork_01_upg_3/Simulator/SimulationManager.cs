@@ -21,6 +21,7 @@ namespace neuralNetwork_01_upg_3.Simulator
 
         public int AlivePopulation { get; private set; }    
         
+
         public SimulationManager(A_NeuralNet[] neuralNets, SnakeMapData snakeMapData)
         {
             this.snakeMapData = snakeMapData;

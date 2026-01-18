@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using neuralNetwork_01_upg_3.Helpers;
 using neuralNetwork_01_upg_3.Simulator.Evolution.SubProcessies;
 using neuralNetwork_01_upg_3.Simulator.Game.Snake;
 using neuralNetwork_01_upg_3.Textures;
@@ -18,12 +19,15 @@ namespace neuralNetwork_01_upg_3.Simulator
         public int CurrentTarget;
         public float CurrentScore;
         public float BestScore;
+        public string GameText = "no data";
         
         public int AliveSnakes => headSimulatorManager._simulationManager.AlivePopulation;
 
         public HeadSimulatorManager headSimulatorManager;
         protected SnakeRenderer sr;
 
+
+        private ButtonHelper SwitchStateButton = new ButtonHelper();
         public int RenderingState = 0;
         private bool switchStateKeyPressed = false;
 
@@ -31,16 +35,26 @@ namespace neuralNetwork_01_upg_3.Simulator
         private Rectangle displayRect = new Rectangle(0, 0, 400, 400);
 
         private Rectangle graphRect = new Rectangle(450, 200, 200, 200);
+        private Rectangle graphRect2 = new Rectangle(0, 440, 800, 30);
+
+
+        private Vector2 textPos = new Vector2(450,30);
 
         private GraphRenderer graphRenderer;
+        private GraphRenderer graphRenderer2;
+
+
+        private Color[] colorList;
 
         public GameManager(GraphicsDevice gd)
         {
+            SwitchStateButton.OnPress += OnChangeRenderState;
+
             var a = new EvoluionSimData
             {
-                neuralNetwork_Height = 10,
-                neuralNetwork_Width = 3,
-                population = 10000,
+                neuralNetwork_Height = 5, // 5
+                neuralNetwork_Width = 2, // 2 
+                population = 5000,
 
                 mapSize = new Point(25,25),
                 
@@ -54,29 +68,56 @@ namespace neuralNetwork_01_upg_3.Simulator
                 (
                 new Selector01(0.7f, 1f, rd.Next()),
                 new Crossover01(rd.Next()),
-                new Mutator01(0.05f,0.1f, 0.01f, rd.Next())
+                new Mutator01(0.005f,0.01f, 0.01f, rd.Next())
 
                 );
 
-            var colors = new Color[]
+            colorList = new Color[]
             {
                 new Color(10,10,10),
                 Color.Red,
                 Color.White,
+                Color.MediumAquamarine,
+                
+
             };
 
-            sr = new SnakeRenderer(SnakeRenderer.CreuateSnakeRenderData(gd, 1, TextureManager.GetTexture("snakeMapSprites"), colors));
+            sr = new SnakeRenderer(SnakeRenderer.CreuateSnakeRenderData(gd, 1, AssetManagerSingleton.TextureManager.GetAsset("snakeMapSprites"), colorList));
             
             sr.SetSnakeGame(headSimulatorManager._simulationManager.simulators[0]);
 
 
-            graphRenderer = new GraphRenderer(new GraphRenderer_Data()
+            graphRenderer = new GraphRenderer(gd, new GraphRenderer_Data()
             {
-                Bounds = graphRect,
+                Bounds = new Point(100, 100),
                 lineThickness = 1,
-                color = Color.Aquamarine,
-                tex = TextureManager.GetTexture("graphTex")
+                color = colorList[3],
+                background_color = colorList[0],
+                tex = AssetManagerSingleton.TextureManager.GetAsset("graph"),
+                connection_tex = AssetManagerSingleton.TextureManager.GetAsset("circle"),
             }, headSimulatorManager.Scores);
+
+
+            graphRenderer2 = new GraphRenderer(gd, new GraphRenderer_Data()
+            {
+                Bounds = new Point(800, 30),
+                lineThickness = 1,
+                color = colorList[3],
+                background_color = colorList[0],
+                tex = AssetManagerSingleton.TextureManager.GetAsset("graph"),
+                connection_tex = AssetManagerSingleton.TextureManager.GetAsset("circle"),
+            }, headSimulatorManager.Scores);
+
+            graphRenderer2.UpdateRT();
+            graphRenderer.UpdateRT();
+
+
+            var v = new List<float>();
+            graphRenderer2.values = v;
+
+            v.Add(10);
+            v.Add(10);
+            v.Add(10);
 
         }
 
@@ -87,12 +128,28 @@ namespace neuralNetwork_01_upg_3.Simulator
 
             
             BestScore = headSimulatorManager.BestScore;
-            ChangeRenderState();
+            UpdateChangeRenderState();
+
+            //ChangeRenderState();
+
+            GameText = $" View: {RenderingState}, Generation: {headSimulatorManager.Generation}\n Target Snake {CurrentTarget} / {AliveSnakes}\n Score: {((int)(CurrentScore * 10)) / 10f}, Best of Current {((int)(BestScore * 10)) / 10f}\n Last Gen Score: {(int)(headSimulatorManager.HighestScoreLastRound * 10) / 10f}, High Score: {(int)(headSimulatorManager.HighestScoreEver * 10) / 10f}\n Frame: {headSimulatorManager.GameFrame}\n Geneome Length; {headSimulatorManager._evolutionManager.population[0].genome.Length}";
         }
 
         
 
         
+        private void OnChangeRenderState(bool btnState)
+        {
+            if (!btnState) return;
+
+            RenderingState++;
+            RenderingState %= 3;
+        }
+
+        private void UpdateChangeRenderState()
+        {
+            SwitchStateButton.UpdatePressed(Keyboard.GetState().IsKeyDown(Keys.Enter));
+        }
 
         private void ChangeRenderState()
         {
@@ -114,18 +171,27 @@ namespace neuralNetwork_01_upg_3.Simulator
         }
         
         
+        
         private void RenderSnake(SpriteBatch _spriteBatch, int snakeSimId)
         {
             var entety = headSimulatorManager._evolutionManager.population[snakeSimId];
 
-            float r = MathF.Sin(entety.genome[entety.genome.Length - 1]);
-            float g = MathF.Sin(entety.genome[entety.genome.Length - 2]);
-            float b = MathF.Sin(entety.genome[entety.genome.Length - 3]);
+            float r = MathF.Cos(entety.genome[entety.genome.Length - 1]);
+            float g = MathF.Cos(entety.genome[entety.genome.Length - 2]);
+            float b = MathF.Cos(entety.genome[entety.genome.Length - 3]);
             sr.renderData.tileType_GameTextures[2].color = new Color(r, g, b, 1);
 
             sr.Render(_spriteBatch, headSimulatorManager._simulationManager.simulators[snakeSimId]);
+
+            if (currentTarget != snakeSimId)
+            {
+                graphRenderer2.values = headSimulatorManager._evolutionManager.population[snakeSimId].genome.ToList();
+            }
+                
+
             CurrentTarget = snakeSimId;
             CurrentScore = headSimulatorManager._simulationManager.simulators[snakeSimId].score;
+            
         }
 
 
@@ -195,18 +261,22 @@ namespace neuralNetwork_01_upg_3.Simulator
                     RenderBestUntillDeath(_spriteBatch);
                     break;
             }
-            
 
 
+
+            graphRenderer.Render(_spriteBatch);
+            graphRenderer2.Render(_spriteBatch);
 
 
             _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointWrap);
 
             _spriteBatch.Draw(sr.renderTarget, displayRect, Color.White);
 
-            _spriteBatch.Draw(TextureManager.GetTexture("a"), graphRenderer.data.Bounds, new Color(30, 30, 30));
-            graphRenderer.Render(_spriteBatch);
-            
+            _spriteBatch.Draw(AssetManagerSingleton.TextureManager.GetAsset("a"), graphRect, colorList[0]);
+            _spriteBatch.Draw(graphRenderer.renderTarget, graphRect, Color.White);
+            _spriteBatch.Draw(graphRenderer2.renderTarget, graphRect2, Color.White);
+
+            _spriteBatch.DrawString(AssetManagerSingleton.FontManager.GetAsset("a"), GameText, textPos, colorList[3]);
 
             _spriteBatch.End();
         }

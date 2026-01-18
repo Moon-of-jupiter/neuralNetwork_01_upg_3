@@ -17,9 +17,9 @@ namespace neuralNetwork_01_upg_3.Textures
         {
             var temp = Vector2.Lerp(A, B, 0.5f);
 
-            Rectangle dest = new Rectangle((int)temp.X,(int)temp.Y, (int)Vector2.Distance(A,B), thickness);
+            Rectangle dest = new Rectangle((int)temp.X,(int)temp.Y, (int)Math.Round(Vector2.Distance(A,B)), thickness);
 
-            sb.Draw(texture, dest, sourceRect, color, AngleOfPoints(A,B), Vector2.One * 0.5f, SpriteEffects.None, 0);
+            sb.Draw(texture, dest, sourceRect, color, AngleOfPoints(A,B), sourceRect.Size.ToVector2() * 0.5f, SpriteEffects.None, 0);
         }
         
         public static float AngleOfPoints(Vector2 A, Vector2 B)

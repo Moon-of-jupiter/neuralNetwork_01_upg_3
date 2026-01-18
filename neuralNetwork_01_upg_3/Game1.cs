@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using neuralNetwork_01_upg_3.Helpers;
 using neuralNetwork_01_upg_3.Simulator;
 using neuralNetwork_01_upg_3.Simulator.NeuralNet;
 using neuralNetwork_01_upg_3.Simulator.NeuralNet.ActivationFunctions;
@@ -23,12 +24,19 @@ namespace neuralNetwork_01_upg_3
 
         private bool firstFrame = true;
 
-        
+        private bool secondFrame = true;
+
+        private ButtonHelper pauseBtn = new();
+        private ButtonHelper toggleBorderlessBtn = new();
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            
+            //Window.IsBorderless = true;
+            
         }
 
         protected override void Initialize()
@@ -37,7 +45,8 @@ namespace neuralNetwork_01_upg_3
 
             base.Initialize();
 
-
+            pauseBtn.OnPress += OnPauseBtn;
+            toggleBorderlessBtn.OnPress += OnBorderlessBtn;
 
         }
 
@@ -46,9 +55,13 @@ namespace neuralNetwork_01_upg_3
 
         protected override void LoadContent()
         {
-            TextureManager.Initialize(Content, "Pixel");
+            AssetManagerSingleton.TextureManager.Initialize(Content, "Pixel");
+            AssetManagerSingleton.FontManager.Initialize(Content, "font1");
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            TextureManager.LoadTexture("placeholder", "Pixel");
+            AssetManagerSingleton.TextureManager.LoadTexture("placeholder", "Pixel");
+            AssetManagerSingleton.TextureManager.LoadTexture("circle", "circleSprite");
+            AssetManagerSingleton.FontManager.LoadTexture("placeholder", "font1");
+            
             // TODO: use this.Content to load your game content here
         }
 
@@ -60,6 +73,21 @@ namespace neuralNetwork_01_upg_3
         }
 
         protected bool isOn = false;
+
+        private void OnPauseBtn(bool btnState)
+        {
+            if (!btnState) return;
+
+            isOn = !isOn;
+        }
+
+        private void OnBorderlessBtn(bool btnState)
+        {
+            if (!btnState) return;
+
+            Window.IsBorderless = !Window.IsBorderless;
+        }
+
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Delete))
@@ -70,16 +98,16 @@ namespace neuralNetwork_01_upg_3
                 OnFirstFrame();
             }
 
+
+            pauseBtn.UpdatePressed(Keyboard.GetState().IsKeyDown(Keys.Space));
+            toggleBorderlessBtn.UpdatePressed(Keyboard.GetState().IsKeyDown(Keys.Tab));
+
+
             if (!isOn)
             {
-                if (!Keyboard.GetState().IsKeyDown(Keys.Space))
-                {
-                    base.Update(gameTime);
-                    return;
-                }
-                
+                base.Update(gameTime);
+                return;
 
-                isOn = true;
             }
             
 
@@ -89,7 +117,8 @@ namespace neuralNetwork_01_upg_3
 
             gm.Update();
 
-            Window.Title = $" view: {gm.RenderingState}, Generation: {gm.headSimulatorManager.Generation}, Target Snake {gm.CurrentTarget} / {gm.AliveSnakes}, Score: {((int)(gm.CurrentScore * 10)) / 10f}, Best of Current {((int)(gm.BestScore * 10)) / 10f}";
+            //Window.Title = gm.GameText;
+            
 
 
             // TODO: Add your update logic here

@@ -77,6 +77,8 @@ namespace neuralNetwork_01_upg_3.Simulator.NeuralNet
                 LayerToSignals(neuralLayers.Last(), ref parrentSignals);
 
                 var layer = CreateLayer(parrentSignals, hidden_n);
+
+                neuralLayers.Add(layer);
             }
         }
 

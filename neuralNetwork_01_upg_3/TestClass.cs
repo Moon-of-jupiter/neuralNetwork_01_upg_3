@@ -54,7 +54,7 @@ namespace neuralNetwork_01_upg_3
                 Color.White,
             };
 
-            var rd = SnakeRenderer.CreuateSnakeRenderData(gd, 1, TextureManager.GetTexture("SnakeSprites"), colors);
+            var rd = SnakeRenderer.CreuateSnakeRenderData(gd, 1, AssetManagerSingleton.TextureManager.GetAsset("SnakeSprites"), colors);
 
             snakeRenderer = new SnakeRenderer(rd);
             snakeRenderer.SetSnakeGame(snakeSimulator);
